@@ -17,23 +17,17 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
-    const payload = isLogin
-      ? { email: formData.email, password: formData.password }
-      : formData;
-
+    
+    // For now, just show a success message since backend isn't connected yet
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'Failed');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       alert(`${isLogin ? 'Logged in' : 'Signed up'} successfully!`);
       setShowModal(false);
+      setFormData({ name: '', email: '', password: '' });
     } catch (err) {
-      alert(err.message);
+      alert('Something went wrong. Please try again.');
     }
   };
 
@@ -44,11 +38,11 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
         🚧 Coming Soon
       </div>
 
-      {/* Login Button */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Login Button - Repositioned to avoid overlap */}
+      <div className="fixed top-4 right-6 z-50">
         <button
           onClick={() => setShowModal(true)}
-          className="bg-black text-white px-5 py-2 rounded-lg shadow hover:bg-gray-800 transition-all"
+          className="bg-black text-white px-6 py-2.5 rounded-lg shadow-lg hover:bg-gray-800 transition-all duration-200 font-medium text-sm"
         >
           Login / Sign Up
         </button>

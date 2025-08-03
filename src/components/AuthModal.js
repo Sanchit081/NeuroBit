@@ -28,107 +28,114 @@ const AuthModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl flex flex-col md:flex-row overflow-hidden relative">
-        {/* Side Illustration */}
-        <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center p-6">
-          <img
-            src="/students-working.svg"
-            alt="Students working"
-            className="w-full h-auto object-contain"
-          />
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4 py-8">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-black text-xl z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm"
+        >
+          ✕
+        </button>
 
         {/* Login / Signup Form */}
-        <div className="w-full md:w-1/2 p-8 relative">
+        <div className="p-8">
           <h2 className="text-2xl font-bold text-center mb-2">
-            {isLogin ? 'Login' : 'Sign Up'}
+            {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
           <p className="text-center text-gray-600 mb-6">
-            {isLogin ? 'Access your account' : 'Create a new account'}
+            {isLogin ? 'Sign in to your account' : 'Join NeuroBit today'}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
+              <div>
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                />
+              </div>
+            )}
+            <div>
               <input
-                name="name"
-                type="text"
-                placeholder="Full Name"
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
               />
-            )}
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border rounded"
-            />
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border rounded"
-            />
+            </div>
+            <div>
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+              />
+            </div>
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium"
             >
-              {isLogin ? 'Login' : 'Sign Up'}
+              {isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="px-4 text-gray-500 text-sm">or</span>
+            <div className="flex-1 border-t border-gray-300"></div>
+          </div>
 
           {/* Google Sign-In */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full border border-gray-300 mt-4 py-2 rounded hover:bg-gray-100 transition flex items-center justify-center gap-2"
+            className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 font-medium"
           >
             <img
               src="https://developers.google.com/identity/images/g-logo.png"
               alt="Google"
               className="w-5 h-5"
             />
-            Sign in with Google
+            Continue with Google
           </button>
 
           {/* Toggle Login/Signup */}
-          <p className="text-center text-sm mt-4 text-gray-600">
+          <p className="text-center text-sm mt-6 text-gray-600">
             {isLogin ? (
               <>
-                Don’t have an account?{' '}
-                <span
+                Don't have an account?{' '}
+                <button
                   onClick={() => setIsLogin(false)}
-                  className="text-blue-600 cursor-pointer hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
                 >
                   Sign Up
-                </span>
+                </button>
               </>
             ) : (
               <>
                 Already have an account?{' '}
-                <span
+                <button
                   onClick={() => setIsLogin(true)}
-                  className="text-blue-600 cursor-pointer hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
                 >
-                  Login
-                </span>
+                  Sign In
+                </button>
               </>
             )}
           </p>
-
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-4 text-gray-500 hover:text-black text-xl"
-          >
-            ✕
-          </button>
         </div>
       </div>
     </div>

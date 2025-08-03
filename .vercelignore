@@ -1,0 +1,5 @@
+backend/
+*.sh
+*.env
+*.lock
+.DS_Store

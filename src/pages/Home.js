@@ -4,6 +4,7 @@ import ProductCards from '../components/ProductCards';
 import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
+import FloatingAITools from '../components/FloatingAITools';
 
 // Force deployment - Updated at: 2025-01-03 17:30:00
 const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
@@ -64,6 +65,9 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
 
   return (
     <div className="min-h-screen gradient-bg">
+      {/* Floating AI Tools */}
+      <FloatingAITools />
+
       {/* Floating Banner */}
       <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
         🚧 Coming Soon

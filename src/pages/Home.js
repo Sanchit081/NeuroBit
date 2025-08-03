@@ -38,7 +38,7 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
         🚧 Coming Soon
       </div>
 
-      {/* Login Button - Repositioned to avoid overlap */}
+      {/* Login Button - Repositioned to avoid overlap - Updated for deployment */}
       <div className="fixed top-4 right-6 z-50">
         <button
           onClick={() => setShowModal(true)}

@@ -5,6 +5,7 @@ import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
 
+// Force deployment - Updated at: 2025-01-03 17:30:00
 const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -68,7 +69,7 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
         🚧 Coming Soon
       </div>
 
-      {/* User Profile (only show if user is logged in) */}
+      {/* User Profile (only show if user is logged in) - REMOVED LOGIN BUTTON */}
       {user && (
         <div className="fixed top-4 right-6 z-50">
           <div className="relative profile-dropdown">

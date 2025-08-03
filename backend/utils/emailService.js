@@ -1,9 +1,7 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter (configure based on your email provider)
+
 const createTransporter = () => {
-  // For development, you can use Gmail or other providers
-  // For production, use services like SendGrid, Mailgun, etc.
   
   if (process.env.NODE_ENV === 'production') {
     // Production email service (SendGrid, Mailgun, etc.)

@@ -12,6 +12,7 @@ import Admin from './pages/Admin';
 function App() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleEmailSubmit = (e) => {
     e.preventDefault();
@@ -21,6 +22,10 @@ function App() {
 
     // Reset after 3 seconds
     setTimeout(() => setIsSubmitted(false), 3000);
+  };
+
+  const handleGetStarted = () => {
+    setShowLoginModal(true);
   };
 
   // Keyboard shortcut for admin access (Ctrl+Shift+A or Cmd+Shift+A)
@@ -38,7 +43,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen gradient-bg">
-        <Header />
+        <Header onGetStarted={handleGetStarted} />
         <Routes>
           <Route 
             path="/" 
@@ -48,6 +53,8 @@ function App() {
                 setEmail={setEmail}
                 onSubmit={handleEmailSubmit}
                 isSubmitted={isSubmitted}
+                showLoginModal={showLoginModal}
+                setShowLoginModal={setShowLoginModal}
               />
             } 
           />

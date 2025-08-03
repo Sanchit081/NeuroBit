@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Brain, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({ onGetStarted }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -12,6 +12,15 @@ const Header = () => {
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const handleGetStarted = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      // Fallback to direct navigation
+      window.location.href = '/products';
+    }
+  };
 
   return (
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
@@ -51,18 +60,11 @@ const Header = () => {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="hidden md:block flex items-center space-x-4"
+            className="hidden md:block"
           >
-            <Link to="/products" className="btn-primary">
+            <button onClick={handleGetStarted} className="btn-primary">
               Get Started
-            </Link>
-            <Link 
-              to="/admin" 
-              className="text-xs text-gray-500 hover:text-primary-600 transition-colors"
-              title="Admin Panel"
-            >
-              Admin
-            </Link>
+            </button>
           </motion.div>
 
           {/* Mobile menu button */}
@@ -96,9 +98,9 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <Link to="/products" className="btn-primary w-full text-center">
+              <button onClick={handleGetStarted} className="btn-primary w-full text-center">
                 Get Started
-              </Link>
+              </button>
             </div>
           </motion.div>
         )}

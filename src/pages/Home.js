@@ -5,8 +5,7 @@ import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
 
-const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
-  const [showModal, setShowModal] = useState(false);
+const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [user, setUser] = useState(null);
@@ -47,8 +46,11 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
       });
       
       alert(`${isLogin ? 'Logged in' : 'Signed up'} successfully!`);
-      setShowModal(false);
+      setShowLoginModal(false);
       setFormData({ name: '', email: '', password: '' });
+      
+      // Redirect to products page after successful login
+      window.location.href = '/products';
     } catch (err) {
       alert('Something went wrong. Please try again.');
     }
@@ -66,9 +68,9 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
         🚧 Coming Soon
       </div>
 
-      {/* User Profile or Login Button */}
-      <div className="fixed top-4 right-6 z-50">
-        {user ? (
+      {/* User Profile (only show if user is logged in) */}
+      {user && (
+        <div className="fixed top-4 right-6 z-50">
           <div className="relative profile-dropdown">
             <button
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -110,18 +112,11 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
               </div>
             )}
           </div>
-        ) : (
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-black text-white px-6 py-2.5 rounded-lg shadow-lg hover:bg-gray-800 transition-all duration-200 font-medium text-sm"
-          >
-            Login / Sign Up
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Auth Modal */}
-      {showModal && (
+      {showLoginModal && (
         <AuthModal
           isLogin={isLogin}
           setIsLogin={setIsLogin}
@@ -129,7 +124,7 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted }) => {
           setFormData={setFormData}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
-          onClose={() => setShowModal(false)}
+          onClose={() => setShowLoginModal(false)}
         />
       )}
 

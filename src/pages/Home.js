@@ -13,22 +13,19 @@ import {
   signInWithPopup,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [user, setUser] = useState(null);
 
-  // ✅ Watch Firebase Auth state
+  // Watch Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-
       if (currentUser) {
-        setShowLoginModal(false); // ✅ Close modal on login
-        toast.success(`Welcome ${currentUser.displayName || 'Back'}!`);
+        setShowLoginModal(false);
+        console.log(`Welcome ${currentUser.displayName || 'Back'}!`);
       }
     });
 
@@ -47,16 +44,16 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
-        toast.success('Logged in successfully!');
+        console.log('Logged in successfully!');
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await userCredential.user.updateProfile({ displayName: name });
-        toast.success('Signed up successfully!');
+        console.log('Signed up successfully!');
       }
 
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
-      toast.error(error.message);
+      console.error('Auth error:', error.message);
     }
   };
 
@@ -64,16 +61,15 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
-      toast.error(error.message);
+      console.error('Google Sign-In Error:', error.message);
     }
   };
 
   return (
     <div className="min-h-screen gradient-bg">
       <FloatingAITools />
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
 
-      {/* ✅ Coming Soon Banner */}
+      {/* Coming Soon Banner */}
       <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
         🚧 Coming Soon
       </div>

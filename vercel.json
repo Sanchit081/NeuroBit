@@ -1,6 +1,14 @@
 {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/index.html" }
-    ]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "buildCommand": "chmod +x build.sh && ./build.sh",
+  "outputDirectory": "build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "functions": {
+    "**/*.js": {
+      "runtime": "nodejs18.x"
+    }
   }
+}
   

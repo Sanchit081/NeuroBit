@@ -5,9 +5,15 @@ import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
 import FloatingAITools from '../components/FloatingAITools';
-import Header from '../components/Header';
-import { auth, provider } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,7 +29,7 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -32,44 +38,45 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
 
     try {
       if (isLogin) {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        setUser(result.user);
-        alert('Logged in successfully!');
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success('Logged in successfully!');
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await userCredential.user.updateProfile({ displayName: name });
-        setUser(userCredential.user);
-        alert('Signed up successfully!');
+        toast.success('Signed up successfully!');
       }
 
       setShowLoginModal(false);
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
+      await signInWithPopup(auth, provider);
+      toast.success('Logged in with Google!');
       setShowLoginModal(false);
-      alert(`Welcome ${result.user.displayName}`);
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen gradient-bg relative">
+      {/* Floating Tool */}
       <FloatingAITools />
 
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
+      {/* Toasts */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop pauseOnHover />
+
+      {/* Coming Soon Banner */}
+      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9998] bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
         🚧 Coming Soon
       </div>
 
-      <Header user={user} onGetStarted={() => setShowLoginModal(true)} />
-
+      {/* Auth Modal */}
       {showLoginModal && (
         <AuthModal
           isLogin={isLogin}
@@ -83,10 +90,11 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
         />
       )}
 
+      {/* Sections */}
       <Hero user={user} />
       <ProductCards />
       <AboutFounder />
-      <EmailWaitlist 
+      <EmailWaitlist
         email={email}
         setEmail={setEmail}
         onSubmit={onSubmit}

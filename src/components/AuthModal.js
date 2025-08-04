@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth, provider, signInWithPopup } from '../firebase';
+import { auth, provider, signInWithPopup, signInWithRedirect } from '../firebase';
 
 const AuthModal = ({
   isLogin,
@@ -10,20 +10,51 @@ const AuthModal = ({
   handleSubmit,
   onClose,
 }) => {
+  // Check if mobile device
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      // Add custom parameters to show account selection
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      let user;
+      if (isMobile()) {
+        // Use redirect for mobile devices
+        await signInWithRedirect(auth, provider);
+        // Note: The result will be handled when the page reloads
+        return;
+      } else {
+        // Use popup for desktop
+        const result = await signInWithPopup(auth, provider);
+        user = result.user;
+      }
+
       console.log('Google Sign-In Success:', user);
 
-      const token = await user.getIdToken();
-      // Optional: Send token to your backend if needed
+      if (user) {
+        const token = await user.getIdToken();
+        // Optional: Send token to your backend if needed
 
-      alert(`Welcome ${user.displayName}`);
-      onClose();
+        alert(`Welcome ${user.displayName}`);
+        onClose();
+      }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      alert('Google Sign-In failed');
+      
+      // Improved error handling
+      if (error.code === 'auth/popup-closed-by-user') {
+        // This is a normal user action, no need to show an error
+        console.log('User closed the sign-in popup');
+      } else if (error.code === 'auth/popup-blocked') {
+        alert('Sign-in popup was blocked. Please allow popups for this site.');
+      } else {
+        alert(`Google Sign-In failed: ${error.message}`);
+      }
     }
   };
 

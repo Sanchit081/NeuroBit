@@ -8,11 +8,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Templates from './pages/Templates';
 import Admin from './pages/Admin';
+import { auth, provider } from './firebase';
+import { getRedirectResult } from 'firebase/auth';
 
 function App() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleEmailSubmit = (e) => {
     e.preventDefault();
@@ -27,6 +30,29 @@ function App() {
   const handleGetStarted = () => {
     setShowLoginModal(true);
   };
+
+  // Handle redirect result from Firebase authentication
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          // User is signed in
+          const user = result.user;
+          console.log('Redirect Sign-In Success:', user);
+          setUser(user);
+          alert(`Welcome ${user.displayName}`);
+        }
+      } catch (error) {
+        console.error('Redirect Sign-In Error:', error);
+        if (error.code !== 'auth/credential-already-in-use') {
+          alert(`Sign-In failed: ${error.message}`);
+        }
+      }
+    };
+    
+    handleRedirectResult();
+  }, []);
 
   // Keyboard shortcut for admin access (Ctrl+Shift+A or Cmd+Shift+A)
   useEffect(() => {

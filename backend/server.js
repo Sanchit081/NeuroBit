@@ -16,7 +16,9 @@ const adminRoutes = require('./routes/admin');
 const feedbackRoutes = require('./routes/feedback');
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true

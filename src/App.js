@@ -10,20 +10,21 @@ import Templates from './pages/Templates';
 import Admin from './pages/Admin';
 import { auth, provider } from './firebase';
 import { getRedirectResult, onAuthStateChanged } from 'firebase/auth';
+import { ToastProvider, useToast } from './components/Toast'; // custom toast
 
-function App() {
+function AppContent() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(null);
+  const { showToast } = useToast();
 
   const handleEmailSubmit = (e) => {
     e.preventDefault();
-    console.log('Email submitted:', email);
     setIsSubmitted(true);
     setEmail('');
+    showToast("You're on the waitlist!");
 
-    // Reset after 3 seconds
     setTimeout(() => setIsSubmitted(false), 3000);
   };
 
@@ -31,39 +32,44 @@ function App() {
     setShowLoginModal(true);
   };
 
-  // Handle redirect result from Firebase authentication
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
         const result = await getRedirectResult(auth);
         if (result) {
-          // User is signed in
           const user = result.user;
-          console.log('Redirect Sign-In Success:', user);
-          setUser(user);
-          alert(`Welcome ${user.displayName}`);
+          setUser({
+            name: user.displayName,
+            email: user.email,
+            avatar: user.photoURL,
+          });
+          showToast(`Welcome ${user.displayName || 'User'}!`);
         }
       } catch (error) {
         console.error('Redirect Sign-In Error:', error);
         if (error.code !== 'auth/credential-already-in-use') {
-          alert(`Sign-In failed: ${error.message}`);
+          showToast(`Sign-In failed: ${error.message}`, 'error');
         }
       }
     };
-    
+
     handleRedirectResult();
 
-    // Listen for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      console.log('Auth state changed:', currentUser);
+      if (currentUser) {
+        setUser({
+          name: currentUser.displayName,
+          email: currentUser.email,
+          avatar: currentUser.photoURL,
+        });
+      } else {
+        setUser(null);
+      }
     });
 
-    // Cleanup subscription
     return () => unsubscribe();
   }, []);
 
-  // Keyboard shortcut for admin access (Ctrl+Shift+A or Cmd+Shift+A)
   useEffect(() => {
     const handleKeyPress = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
@@ -76,32 +82,42 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <div className="min-h-screen gradient-bg">
-        <Header onGetStarted={handleGetStarted} user={user} />
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Home 
-                email={email}
-                setEmail={setEmail}
-                onSubmit={handleEmailSubmit}
-                isSubmitted={isSubmitted}
-                showLoginModal={showLoginModal}
-                setShowLoginModal={setShowLoginModal}
-              />
-            } 
-          />
-          <Route path="/products" element={<Products />} />
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/about" element={<About user={user} />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+    <div className="min-h-screen gradient-bg">
+      <Header onGetStarted={handleGetStarted} user={user} />
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <Home 
+              email={email}
+              setEmail={setEmail}
+              onSubmit={handleEmailSubmit}
+              isSubmitted={isSubmitted}
+              showLoginModal={showLoginModal}
+              setShowLoginModal={setShowLoginModal}
+              setUser={setUser}
+              user={user}
+            />
+          } 
+        />
+        <Route path="/products" element={<Products />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/about" element={<About user={user} />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ToastProvider>
   );
 }
 

@@ -1,5 +1,12 @@
 import React from 'react';
-import { auth, provider, signInWithPopup, signInWithRedirect } from '../firebase';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect
+} from 'firebase/auth';
+import { auth, provider } from '../firebase';
+import { useToast } from './Toast';
 
 const AuthModal = ({
   isLogin,
@@ -7,165 +14,121 @@ const AuthModal = ({
   formData,
   setFormData,
   handleChange,
-  handleSubmit,
   onClose,
+  setUser
 }) => {
-  // Check if mobile device
-  const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const { showToast } = useToast();
+
+  const isMobile = () =>
+    /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const userCred = isLogin
+        ? await signInWithEmailAndPassword(auth, formData.email, formData.password)
+        : await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+
+      const user = userCred.user;
+      setUser({
+        name: user.displayName || formData.name || 'User',
+        email: user.email,
+        avatar: user.photoURL || `https://ui-avatars.com/api/?name=${formData.name || 'User'}&background=random`,
+      });
+
+      showToast(`${isLogin ? 'Logged in' : 'Account created'} successfully!`);
+      setFormData({ name: '', email: '', password: '' });
+      onClose();
+    } catch (error) {
+      console.error(error);
+      showToast(error.message, 'error');
+    }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      // Add custom parameters to show account selection
-      provider.setCustomParameters({
-        prompt: 'select_account'
+      provider.setCustomParameters({ prompt: 'select_account' });
+
+      const result = isMobile()
+        ? await signInWithRedirect(auth, provider)
+        : await signInWithPopup(auth, provider);
+
+      const user = result.user;
+      setUser({
+        name: user.displayName,
+        email: user.email,
+        avatar: user.photoURL,
       });
-      
-      let user;
-      if (isMobile()) {
-        // Use redirect for mobile devices
-        await signInWithRedirect(auth, provider);
-        // Note: The result will be handled when the page reloads
-        return;
-      } else {
-        // Use popup for desktop
-        const result = await signInWithPopup(auth, provider);
-        user = result.user;
-      }
 
-      console.log('Google Sign-In Success:', user);
-
-      if (user) {
-        const token = await user.getIdToken();
-        // Optional: Send token to your backend if needed
-
-        alert(`Welcome ${user.displayName}`);
-        onClose();
-      }
+      showToast(`Welcome ${user.displayName}`);
+      onClose();
     } catch (error) {
-      console.error('Google Sign-In Error:', error);
-      
-      // Improved error handling
-      if (error.code === 'auth/popup-closed-by-user') {
-        // This is a normal user action, no need to show an error
-        console.log('User closed the sign-in popup');
-      } else if (error.code === 'auth/popup-blocked') {
-        alert('Sign-in popup was blocked. Please allow popups for this site.');
-      } else {
-        alert(`Google Sign-In failed: ${error.message}`);
-      }
+      console.error(error);
+      showToast(error.message, 'error');
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4 py-8">
-      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden relative max-h-[90vh] overflow-y-auto">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black text-xl z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm"
-        >
-          ✕
-        </button>
-
-        {/* Login / Signup Form */}
+      <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 text-xl">✕</button>
         <div className="p-8">
           <h2 className="text-2xl font-bold text-center mb-2">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
-          <p className="text-center text-gray-600 mb-6">
-            {isLogin ? 'Sign in to your account' : 'Join NeuroBit today'}
-          </p>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div>
-                <input
-                  name="name"
-                  type="text"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                />
-              </div>
+              <input
+                name="name"
+                type="text"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border rounded-lg"
+              />
             )}
-            <div>
-              <input
-                name="email"
-                type="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <input
-                name="password"
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium"
-            >
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border rounded-lg"
+            />
+            <button className="w-full bg-black text-white py-3 rounded-lg">
               {isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-gray-500 text-sm">or</span>
-            <div className="flex-1 border-t border-gray-300"></div>
-          </div>
+          <div className="my-4 text-center text-sm text-gray-500">or</div>
 
-          {/* Google Sign-In */}
           <button
-            type="button"
             onClick={handleGoogleSignIn}
-            className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 font-medium"
+            className="w-full flex items-center justify-center gap-3 border py-3 rounded-lg"
           >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="Google"
-              className="w-5 h-5"
-            />
+            <img src="https://developers.google.com/identity/images/g-logo.png" className="w-5 h-5" />
             Continue with Google
           </button>
 
-          {/* Toggle Login/Signup */}
-          <p className="text-center text-sm mt-6 text-gray-600">
-            {isLogin ? (
-              <>
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Sign Up
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Sign In
-                </button>
-              </>
-            )}
+          <p className="mt-6 text-center text-sm">
+            {isLogin ? 'No account?' : 'Already have an account?'}{' '}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-blue-600 underline"
+            >
+              {isLogin ? 'Sign Up' : 'Sign In'}
+            </button>
           </p>
         </div>
       </div>

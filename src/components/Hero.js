@@ -1,57 +1,36 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Target, TrendingUp, Zap, Brain, Cpu } from 'lucide-react';
+import { ArrowRight, Sparkles, Target, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Hero = () => {
+const Hero = ({ user }) => {
   return (
     <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50"></div>
-      
+
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 blur-xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full opacity-20 blur-xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.3, 0.2, 0.3],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.2, 0.3] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full opacity-20 blur-xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center">
-          {/* Enhanced Badge */}
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -61,7 +40,7 @@ const Hero = () => {
             AI-Enhanced Productivity Tools
           </motion.div>
 
-          {/* Enhanced Main Heading */}
+          {/* Main Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,52 +55,54 @@ const Hero = () => {
             <span className="text-gray-800">with Smart Digital Tools</span>
           </motion.h1>
 
-          {/* Enhanced Subtitle */}
+          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed"
           >
-            Designed for students, creators, and young professionals. 
-            Get AI-enhanced Notion templates, GPT tools, and automation utilities 
+            Designed for students, creators, and young professionals.
+            Get AI-enhanced Notion templates, GPT tools, and automation utilities
             that actually work.
           </motion.p>
 
-          {/* Enhanced CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
-          >
+          {/* CTA Buttons — only if user is not logged in */}
+          {!user && (
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
             >
-              <Link to="/templates" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg">
-                View Templates
-                <ArrowRight className="w-6 h-6 ml-3" />
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to="/templates"
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
+                >
+                  View Templates
+                  <ArrowRight className="w-6 h-6 ml-3" />
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to="/products"
+                  className="inline-flex items-center px-8 py-4 bg-white text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg border-2 border-gray-200 hover:border-purple-300"
+                >
+                  Explore Products
+                </Link>
+              </motion.div>
             </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link to="/products" className="inline-flex items-center px-8 py-4 bg-white text-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg border-2 border-gray-200 hover:border-purple-300">
-                Explore Products
-              </Link>
-            </motion.div>
-          </motion.div>
+          )}
 
-          {/* Enhanced Stats */}
+          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
           >
-            <motion.div 
+            <motion.div
               className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -132,8 +113,8 @@ const Hero = () => {
               <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">500+</h3>
               <p className="text-gray-600 font-medium">Happy Users</p>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -144,8 +125,8 @@ const Hero = () => {
               <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">3x</h3>
               <p className="text-gray-600 font-medium">Productivity Boost</p>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -163,4 +144,4 @@ const Hero = () => {
   );
 };
 
-export default Hero; 
+export default Hero;

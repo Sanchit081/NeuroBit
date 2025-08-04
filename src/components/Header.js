@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Brain, Menu, X, User, LogOut, Info } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Brain, Menu, X, User, LogOut, Info, Settings, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 
 const Header = ({ onGetStarted, user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const location = useLocation();
 
   const navItems = [
     { name: 'Products', href: '/products' },
@@ -21,6 +23,34 @@ const Header = ({ onGetStarted, user }) => {
     } else {
       // Fallback to direct navigation
       window.location.href = '/products';
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setIsProfileOpen(false);
+  }, [location.pathname]);
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      setIsProfileOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
@@ -70,46 +100,121 @@ const Header = ({ onGetStarted, user }) => {
             className="hidden md:flex items-center space-x-4"
           >
             {user ? (
-              <div className="relative">
-                <button 
+              <div className="relative" ref={dropdownRef}>
+                <motion.button 
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 focus:outline-none group"
+                  className="flex items-center space-x-3 focus:outline-none group bg-white/50 hover:bg-white/80 rounded-xl px-3 py-2 transition-all duration-200 border border-gray-200/50 hover:border-purple-200 hover:shadow-md"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-md overflow-hidden">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-5 h-5 text-white" />
-                    )}
+                  <div className="relative">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-md overflow-hidden ring-2 ring-white">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                   </div>
-                  <span className="text-gray-700 font-medium group-hover:text-purple-600 transition-colors duration-200">
-                    {user.displayName ? user.displayName.split(' ')[0] : 'User'}
-                  </span>
-                </button>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-200">
+                      {user.displayName ? user.displayName.split(' ')[0] : 'User'}
+                    </span>
+                    <span className="text-xs text-gray-500 truncate max-w-24">
+                      {user.email}
+                    </span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: isProfileOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-purple-500" />
+                  </motion.div>
+                </motion.button>
                 
-                {/* Dropdown Menu */}
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
-                    <Link 
-                      to="/about" 
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
-                      onClick={() => setIsProfileOpen(false)}
+                {/* Enhanced Dropdown Menu */}
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl py-2 z-50 border border-gray-100 overflow-hidden backdrop-blur-sm"
+                      style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
                     >
-                      <Info className="w-4 h-4" />
-                      <span>About</span>
-                    </Link>
-                    <button 
-                      onClick={() => {
-                        auth.signOut();
-                        setIsProfileOpen(false);
-                      }}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200 w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                )}
+                      {/* User Info Header */}
+                      <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-blue-50">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg overflow-hidden">
+                            {user.photoURL ? (
+                              <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-6 h-6 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {user.displayName || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="py-2">
+                        <Link 
+                          to="/about" 
+                          className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:text-purple-600 transition-all duration-200 group"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-200">
+                            <Info className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <span className="text-sm font-medium">About</span>
+                            <p className="text-xs text-gray-500">Learn more about NeuroBit</p>
+                          </div>
+                        </Link>
+                        
+                        <Link 
+                          to="/products" 
+                          className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 hover:text-purple-600 transition-all duration-200 group"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors duration-200">
+                            <Settings className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <span className="text-sm font-medium">Products</span>
+                            <p className="text-xs text-gray-500">Explore AI tools</p>
+                          </div>
+                        </Link>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-100 my-2"></div>
+
+                      {/* Sign Out */}
+                      <button 
+                        onClick={handleSignOut}
+                        className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 w-full text-left group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors duration-200">
+                          <LogOut className="w-4 h-4 text-red-600" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium">Sign Out</span>
+                          <p className="text-xs text-gray-500">Sign out of your account</p>
+                        </div>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <button 
@@ -176,10 +281,10 @@ const Header = ({ onGetStarted, user }) => {
                   </Link>
                   <button 
                     onClick={() => {
-                      auth.signOut();
+                      handleSignOut();
                       setIsMenuOpen(false);
                     }}
-                    className="flex items-center space-x-2 px-2 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200 w-full text-left rounded-lg"
+                    className="flex items-center space-x-2 px-2 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 w-full text-left rounded-lg"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>

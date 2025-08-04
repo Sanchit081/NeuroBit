@@ -5,12 +5,13 @@ import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
 import FloatingAITools from '../components/FloatingAITools';
-import { auth } from '../firebase';
+import Header from '../components/Header';
+import { auth, provider } from '../firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,12 +21,19 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [user, setUser] = useState(null);
 
+  // ✅ Watch Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        setShowLoginModal(false); // ✅ Close modal on login
+        toast.success(`Welcome ${currentUser.displayName || 'Back'}!`);
+      }
     });
+
     return () => unsubscribe();
-  }, []);
+  }, [setShowLoginModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +54,6 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
         toast.success('Signed up successfully!');
       }
 
-      setShowLoginModal(false);
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
       toast.error(error.message);
@@ -56,27 +63,23 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
-      toast.success('Logged in with Google!');
-      setShowLoginModal(false);
     } catch (error) {
       toast.error(error.message);
     }
   };
 
   return (
-    <div className="min-h-screen gradient-bg relative">
-      {/* Floating Tool */}
+    <div className="min-h-screen gradient-bg">
       <FloatingAITools />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
 
-      {/* Toasts */}
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop pauseOnHover />
-
-      {/* Coming Soon Banner */}
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9998] bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
+      {/* ✅ Coming Soon Banner */}
+      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-400 text-black font-bold text-lg px-6 py-3 rounded-full shadow-lg animate-bounce">
         🚧 Coming Soon
       </div>
 
-      {/* Auth Modal */}
+      <Header user={user} onGetStarted={() => setShowLoginModal(true)} />
+
       {showLoginModal && (
         <AuthModal
           isLogin={isLogin}
@@ -90,7 +93,6 @@ const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowL
         />
       )}
 
-      {/* Sections */}
       <Hero user={user} />
       <ProductCards />
       <AboutFounder />

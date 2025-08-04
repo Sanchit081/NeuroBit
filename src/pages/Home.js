@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import ProductCards from '../components/ProductCards';
 import AboutFounder from '../components/AboutFounder';
 import EmailWaitlist from '../components/EmailWaitlist';
 import AuthModal from '../components/AuthModal';
 import FloatingAITools from '../components/FloatingAITools';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import Header from '../components/Header';
 import { auth, provider } from '../firebase';
-import { useToast } from '../components/Toast';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 
-const Home = ({
-  email,
-  setEmail,
-  onSubmit,
-  isSubmitted,
-  showLoginModal,
-  setShowLoginModal,
-  setUser,
-  user,
-}) => {
+const Home = ({ email, setEmail, onSubmit, isSubmitted, showLoginModal, setShowLoginModal }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const { showToast } = useToast();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -35,42 +33,30 @@ const Home = ({
     try {
       if (isLogin) {
         const result = await signInWithEmailAndPassword(auth, email, password);
-        showToast(`Welcome back, ${result.user.displayName || 'User'}!`);
-        setUser({
-          name: result.user.displayName,
-          email: result.user.email,
-          avatar: result.user.photoURL,
-        });
+        setUser(result.user);
+        alert('Logged in successfully!');
       } else {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        await result.user.updateProfile({ displayName: name });
-        showToast('Account created successfully!');
-        setUser({
-          name,
-          email: result.user.email,
-          avatar: result.user.photoURL,
-        });
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await userCredential.user.updateProfile({ displayName: name });
+        setUser(userCredential.user);
+        alert('Signed up successfully!');
       }
 
       setShowLoginModal(false);
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
-      showToast(error.message, 'error');
+      alert(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      setUser({
-        name: result.user.displayName,
-        email: result.user.email,
-        avatar: result.user.photoURL,
-      });
-      showToast(`Signed in as ${result.user.displayName || 'User'}!`);
+      setUser(result.user);
       setShowLoginModal(false);
+      alert(`Welcome ${result.user.displayName}`);
     } catch (error) {
-      showToast(error.message, 'error');
+      alert(error.message);
     }
   };
 
@@ -82,7 +68,8 @@ const Home = ({
         🚧 Coming Soon
       </div>
 
-      {/* Modal is triggered by Header or CTA */}
+      <Header user={user} onGetStarted={() => setShowLoginModal(true)} />
+
       {showLoginModal && (
         <AuthModal
           isLogin={isLogin}

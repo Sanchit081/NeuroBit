@@ -17,10 +17,13 @@ import {
   Lightbulb,
   TrendingUp,
   Download,
-  Star
+  Star,
+  Mail,
+  Calendar,
+  Shield
 } from 'lucide-react';
 
-const About = () => {
+const About = ({ user }) => {
   const achievements = [
     { icon: GraduationCap, text: "Computer Science Graduate", color: "text-blue-600" },
     { icon: Briefcase, text: "5+ Years in Tech Industry", color: "text-green-600" },
@@ -80,6 +83,82 @@ const About = () => {
   return (
     <div className="min-h-screen gradient-bg pt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* User Profile Section - Only shown when user is logged in */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl shadow-xl p-6 mb-16 border border-purple-100"
+          >
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg overflow-hidden">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-16 h-16 text-white" />
+                )}
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  {user.displayName || 'NeuroBit User'}
+                </h2>
+                
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600">
+                    <Mail className="w-4 h-4 text-purple-500" />
+                    <span>{user.email}</span>
+                  </div>
+                  
+                  {user.metadata && (
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                      <span>Member since {new Date(parseInt(user.metadata.creationTime)).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-purple-50 rounded-lg p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Account Status</h3>
+                      <p className="text-sm text-gray-600">
+                        {user.emailVerified ? 'Verified Account' : 'Email verification pending'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 rounded-lg p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Target className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Authentication</h3>
+                      <p className="text-sm text-gray-600">
+                        {user.providerData && user.providerData[0]?.providerId === 'google.com' 
+                          ? 'Google Sign-In' 
+                          : 'Email & Password'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-center md:justify-start">
+                  <Link 
+                    to="/" 
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium hover:scale-105"
+                  >
+                    Back to Home
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -309,4 +388,4 @@ const About = () => {
   );
 };
 
-export default About; 
+export default About;

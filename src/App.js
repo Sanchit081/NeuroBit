@@ -9,7 +9,7 @@ import Contact from './pages/Contact';
 import Templates from './pages/Templates';
 import Admin from './pages/Admin';
 import { auth, provider } from './firebase';
-import { getRedirectResult } from 'firebase/auth';
+import { getRedirectResult, onAuthStateChanged } from 'firebase/auth';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -52,6 +52,15 @@ function App() {
     };
     
     handleRedirectResult();
+
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      console.log('Auth state changed:', currentUser);
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   // Keyboard shortcut for admin access (Ctrl+Shift+A or Cmd+Shift+A)
@@ -69,7 +78,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen gradient-bg">
-        <Header onGetStarted={handleGetStarted} />
+        <Header onGetStarted={handleGetStarted} user={user} />
         <Routes>
           <Route 
             path="/" 
@@ -86,7 +95,7 @@ function App() {
           />
           <Route path="/products" element={<Products />} />
           <Route path="/templates" element={<Templates />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<About user={user} />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
